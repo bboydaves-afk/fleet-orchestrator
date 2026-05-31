@@ -1,0 +1,31 @@
+name: agent-offline-restart-workflow
+version: "1.0"
+description: >
+  When a critical agent (sysadmin, network, monitoring) goes offline,
+  run the security audit workflow to check infrastructure health.
+  Requires approval for safety.
+enabled: false
+
+trigger_type: fleet_event
+conditions:
+  event_type: agent_offline
+
+target_filter:
+  agent_names:
+    - sysadmin_agent
+    - network_agent
+    - monitoring_agent
+
+actions:
+  - type: workflow
+    workflow_name: security_audit
+  - type: escalate
+    level: 2
+    message: "Critical agent offline - infrastructure check initiated"
+    channels: [slack, email]
+
+cooldown_seconds: 600
+max_retries: 2
+escalate_after_retries: 2
+escalation_channels: [email]
+require_approval: true

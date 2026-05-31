@@ -1,0 +1,23 @@
+name: degraded-agent-health-check
+version: "1.0"
+description: >
+  When an agent becomes degraded (auth issues, slow response),
+  send a notification to the team.
+enabled: true
+
+trigger_type: fleet_event
+conditions:
+  event_type: agent_degraded
+
+target_filter: {}
+
+actions:
+  - type: alert
+    message: "Agent ${{agent_name}} is degraded — may need attention"
+    channels: [slack]
+
+cooldown_seconds: 180
+max_retries: 5
+escalate_after_retries: 3
+escalation_channels: [slack]
+require_approval: false

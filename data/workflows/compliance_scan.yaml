@@ -1,0 +1,52 @@
+name: compliance_scan
+description: "Periodic compliance scan across all systems — network, cloud, endpoints, M365"
+
+steps:
+  - name: network_compliance
+    agent: network_agent
+    tool: run_compliance_check
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: cloud_compliance
+    agent: azure_architect_agent
+    tool: run_compliance_assessment
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: endpoint_compliance
+    agent: endpoint_agent
+    tool: run_compliance_check
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: m365_compliance
+    agent: m365_agent
+    tool: run_compliance_check
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: grc_report
+    agent: compliance_agent
+    tool: generate_compliance_report
+    params: {}
+    depends_on:
+      - network_compliance
+      - cloud_compliance
+      - endpoint_compliance
+      - m365_compliance
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60

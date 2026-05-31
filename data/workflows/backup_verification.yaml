@@ -1,0 +1,52 @@
+name: backup_verification
+description: "Backup verification across all systems — servers, network configs, cloud resources"
+
+steps:
+  - name: backup_status
+    agent: backup_agent
+    tool: list_backup_jobs
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: server_backups
+    agent: sysadmin_agent
+    tool: list_backup_status
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: network_backups
+    agent: network_agent
+    tool: list_config_backups
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: cloud_backups
+    agent: azure_architect_agent
+    tool: list_backup_status
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: summary
+    agent: backup_agent
+    tool: generate_backup_report
+    params: {}
+    depends_on:
+      - backup_status
+      - server_backups
+      - network_backups
+      - cloud_backups
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60

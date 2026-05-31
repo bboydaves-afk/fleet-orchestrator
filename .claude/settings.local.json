@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I {} basename {})",
+      "Bash(find /c/Users/carin/OneDrive/Desktop/fleet_orchestrator -not -path */venv/* -type f -name *.py)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''engines/agentic_loop_engine.py''\\).read\\(\\)\\); print\\(''agentic_loop_engine.py: OK''\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''interfaces/web/routes/agentic.py''\\).read\\(\\)\\); print\\(''routes/agentic.py: OK''\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''interfaces/web/app.py''\\).read\\(\\)\\); print\\(''web/app.py: OK''\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''run.py''\\).read\\(\\)\\); print\\(''run.py: OK''\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''core/database.py''\\).read\\(\\)\\); print\\(''database.py: OK''\\)\")"
+    ]
+  }
+}

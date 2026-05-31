@@ -1,0 +1,23 @@
+name: workflow-failure-notify
+version: "1.0"
+description: >
+  Alert the team when a scheduled workflow fails.
+  Escalate if the same workflow fails 3 times.
+enabled: false
+
+trigger_type: fleet_event
+conditions:
+  event_type: workflow_failed
+
+target_filter: {}
+
+actions:
+  - type: alert
+    message: "Workflow failed"
+    channels: [slack]
+
+cooldown_seconds: 120
+max_retries: 3
+escalate_after_retries: 3
+escalation_channels: [email]
+require_approval: false

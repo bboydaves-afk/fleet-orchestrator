@@ -1,0 +1,298 @@
+app:
+  name: "Fleet Orchestrator"
+  version: "1.0.0"
+  port: 8089
+  log_level: INFO
+
+database:
+  path: "data/fleet_orchestrator.db"
+
+credentials:
+  encryption_key_env: "FLEET_ENCRYPTION_KEY"
+
+ai_agent:
+  model: "claude-sonnet-4-5-20250929"
+  max_tokens: 4096
+  system_prompt: |
+    You are the Fleet Orchestrator — a meta-agent that manages a fleet of
+    specialized AI agents.  You can discover tools across all agents, execute
+    them, compose multi-agent workflows, monitor fleet health autonomously,
+    manage alert channels/rules, enforce remediation policies, schedule
+    recurring jobs, and handle escalations.
+
+autonomous:
+  policy_dir: "data/policies"
+  fleet_monitor_interval_seconds: 120
+  auto_enable_safe_policies: true
+  auto_enable_scheduled_jobs: true
+
+  notification_channels:
+    - name: "slack"
+      channel_type: "slack"
+      enabled: true
+      config:
+        webhook_url_env: "FLEET_SLACK_WEBHOOK_URL"
+
+    - name: "teams"
+      channel_type: "teams"
+      enabled: true
+      config:
+        webhook_url_env: "FLEET_TEAMS_WEBHOOK"
+
+    - name: "email"
+      channel_type: "email"
+      enabled: false
+      config:
+        smtp_host_env: "FLEET_SMTP_HOST"
+        smtp_port: 587
+        username_env: "FLEET_SMTP_USER"
+        password_env: "FLEET_SMTP_PASS"
+        from_address_env: "FLEET_EMAIL_FROM"
+        to_addresses_env: "FLEET_EMAIL_TO"
+
+    - name: "webhook"
+      channel_type: "webhook"
+      enabled: true
+      config:
+        url_env: "FLEET_WEBHOOK_URL"
+
+  escalation:
+    business_hours_start: 8
+    business_hours_end: 18
+    timezone: "America/New_York"
+    channels:
+      - "slack"
+
+  scheduled_jobs:
+    - name: "morning_briefing"
+      description: "Daily fleet status briefing"
+      action_type: "briefing"
+      action_config: {}
+      trigger:
+        type: "cron"
+        cron: "0 8 * * *"
+        timezone: "America/New_York"
+      enabled: true
+
+    - name: "fleet_health_report"
+      description: "Periodic fleet health check and report"
+      action_type: "health_report"
+      action_config: {}
+      trigger:
+        type: "interval"
+        interval_seconds: 3600
+      enabled: true
+
+    - name: "nightly_compliance_scan"
+      description: "Nightly compliance scan across all systems"
+      action_type: "workflow"
+      action_config:
+        workflow_name: "compliance_scan"
+      trigger:
+        type: "cron"
+        cron: "0 2 * * *"
+        timezone: "America/New_York"
+      enabled: true
+
+    - name: "backup_verification"
+      description: "Daily backup verification across all systems"
+      action_type: "workflow"
+      action_config:
+        workflow_name: "backup_verification"
+      trigger:
+        type: "cron"
+        cron: "0 6 * * *"
+        timezone: "America/New_York"
+      enabled: true
+
+agentic_loop:
+  max_iterations: 25
+  timeout_seconds: 1200
+  max_concurrent_sessions: 3
+  model: ""  # empty = inherit from ai_agent.model
+  webhook_api_key: ""  # loaded from AGENTIC_WEBHOOK_API_KEY env var
+  system_prompt_suffix: |
+    ## CRITICAL: Execution-First Policy
+
+    You are an MSP operations agent. Staff submitting tickets are NOT technical — they
+    give vague requests. Your job is to EXECUTE, not triage. Never call complete_task
+    with a plan or list of "next steps" — actually DO the work first.
+
+    WRONG: "Here's what I would do: 1) create user 2) assign license..."
+    RIGHT: *calls create_entra_user* → *calls assign_m365_license* → "Done. Created larry.obrien@voltsys.ai with E3 license."
+
+    ## Organization Defaults (use unless told otherwise)
+
+    - Email domain: voltsys.ai
+    - Email format: firstname.lastname@voltsys.ai (lowercase, no special chars)
+    - Display name: "Firstname Lastname" (proper case)
+    - Default license: ENTERPRISEPACK (Office 365 E3)
+    - Temp password format: "Welcome2026!" (force change on first sign-in)
+    - Security groups: security_enabled=true, mail_enabled=false
+    - Group mail nickname: lowercase-with-hyphens (e.g., "finance-team")
+
+    ## Smart Default Rules
+
+    **User creation** — if given just a name (e.g., "create user John Smith"):
+    1. Use firstname.lastname@voltsys.ai as the UPN and mail
+    2. Display name = "John Smith"
+    3. Password = "Welcome2026!" with force_change_password_next_sign_in=true
+    4. IMMEDIATELY after creating the user, set usage_location="US" via update_entra_user
+       (Azure REQUIRES usageLocation before license assignment — always do this step!)
+    5. Look up the real SKU ID via list_m365_subscribed_skus, find ENTERPRISEPACK, use the sku_id UUID
+    6. Assign the license using the UUID sku_id (NOT the string "ENTERPRISEPACK")
+    7. Skip optional fields (job title, department, manager) unless provided
+    8. DO NOT stop to ask for email format, password, or license — use the defaults above
+
+    **Group creation** — if given just a name (e.g., "create finance group"):
+    1. Display name = as requested
+    2. Mail nickname = lowercase-hyphens version
+    3. Security enabled = true, mail enabled = false
+    4. Description = reasonable default based on name
+
+    **User + group operations** — "add John to the finance group":
+    1. Search for the user by name
+    2. Search for the group by name
+    3. Add the member — don't ask for confirmation
+
+    **Troubleshooting** — "printer not working", "can't access email":
+    1. Run diagnostic tools first
+    2. Attempt remote remediation
+    3. If can't fix remotely, provide detailed triage WITH remediation steps already attempted
+    4. Always document what you tried, what worked, what didn't
+
+    ## Handling Ambiguity
+
+    - If the request is clear enough to act on, ACT. Don't ask for clarification.
+    - If truly ambiguous (e.g., "create a group" with no name), make a reasonable choice
+      and document your assumption in the completion summary.
+    - NEVER say "I need the following information to proceed" — you're autonomous.
+    - Prefer action over perfection. It's easier to fix a slightly wrong action than
+      to leave a ticket unresolved.
+
+    ## Institutional Knowledge
+
+    Check the org_knowledge and learned_patterns sections below (if present) for
+    organization-specific facts and previously successful approaches. Apply these
+    patterns when handling similar requests.
+
+agents:
+  # Passwords loaded from AGENT_<NAME>_PASSWORD env vars (see .env)
+  sysadmin_agent:
+    url: "http://localhost:8081"
+    display_name: "Senior SysAdmin"
+    enabled: true
+    auth:
+      username: admin
+
+  azure_architect_agent:
+    url: "http://localhost:8082"
+    display_name: "Azure Architect"
+    enabled: true
+    auth:
+      username: admin
+
+  marketing_agent:
+    url: "http://localhost:8083"
+    display_name: "Marketing Ops"
+    enabled: true
+    auth:
+      username: admin
+
+  hacking_agent:
+    url: "http://localhost:8084"
+    display_name: "CyberSecurity"
+    enabled: true
+    auth:
+      username: admin
+
+  content_creator_agent:
+    url: "http://localhost:8085"
+    display_name: "Content Creator"
+    enabled: false  # not deployed
+    auth:
+      username: admin
+
+  youtube_growth_agent:
+    url: "http://localhost:8086"
+    display_name: "YouTube Growth"
+    enabled: false  # not deployed
+    auth:
+      username: admin
+
+  ftmo_manager:
+    url: "http://localhost:8087"
+    display_name: "FTMO Trading"
+    enabled: false  # not deployed
+    auth:
+      username: admin
+
+  network_agent:
+    url: "http://localhost:8088"
+    display_name: "Network Engineer"
+    enabled: true
+    auth:
+      username: admin
+
+  compliance_agent:
+    url: "http://localhost:8091"
+    display_name: "Compliance & GRC"
+    enabled: true
+    auth:
+      username: admin
+
+  vcio_agent:
+    url: "http://localhost:8092"
+    display_name: "Virtual CIO"
+    enabled: true
+    auth:
+      username: admin
+
+  psa_agent:
+    url: "http://localhost:8093"
+    display_name: "PSA & Billing"
+    enabled: true
+    auth:
+      username: admin
+
+  endpoint_agent:
+    url: "http://localhost:8094"
+    display_name: "Endpoint Management"
+    enabled: true
+    auth:
+      username: admin
+
+  onboarding_agent:
+    url: "http://localhost:8100"
+    display_name: "Client Onboarding"
+    enabled: true
+    auth:
+      username: admin
+
+  m365_agent:
+    url: "http://localhost:8096"
+    display_name: "M365 Admin"
+    enabled: true
+    auth:
+      username: admin
+
+  monitoring_agent:
+    url: "http://localhost:8097"
+    display_name: "Monitoring & NOC"
+    enabled: true
+    auth:
+      username: admin
+
+  helpdesk_agent:
+    url: "http://localhost:8098"
+    display_name: "Help Desk Triage"
+    enabled: true
+    auth:
+      username: admin
+
+  backup_agent:
+    url: "http://localhost:8099"
+    display_name: "Backup & DR"
+    enabled: true
+    auth:
+      username: admin

@@ -1,0 +1,63 @@
+name: infrastructure_diagnostics
+description: "Deep infrastructure diagnostics — sequential checks building on each other for root cause analysis"
+
+steps:
+  - name: server_audit
+    agent: sysadmin_agent
+    tool: list_servers
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: network_audit
+    agent: network_agent
+    tool: run_health_check
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: compliance_check
+    agent: compliance_agent
+    tool: run_compliance_scan
+    params: {}
+    depends_on:
+      - server_audit
+      - network_audit
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: security_scan
+    agent: hacking_agent
+    tool: list_findings
+    params: {}
+    depends_on:
+      - server_audit
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: backup_verify
+    agent: backup_agent
+    tool: verify_backups
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: generate_report
+    agent: monitoring_agent
+    tool: generate_incident_report
+    params: {}
+    depends_on:
+      - compliance_check
+      - security_scan
+      - backup_verify
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60

@@ -1,0 +1,25 @@
+name: agent-offline-auto-restart
+version: "1.0"
+description: >
+  Automatically restart an agent when it goes offline.
+  Rate-limited to 3 restarts per hour per agent.
+  Disabled by default — enable when ready for autonomous restarts.
+enabled: false
+
+trigger_type: fleet_event
+conditions:
+  event_type: agent_offline
+
+target_filter: {}
+
+actions:
+  - type: tool_exec
+    tool_name: restart_agent
+    tool_input:
+      agent_name: "${{agent_name}}"
+
+cooldown_seconds: 900
+max_retries: 3
+escalate_after_retries: 3
+escalation_channels: [slack]
+require_approval: false

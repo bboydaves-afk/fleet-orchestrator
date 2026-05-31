@@ -1,0 +1,31 @@
+name: security_audit
+description: "Cross-agent security audit — recon + compliance + network audit + cloud review"
+
+steps:
+  - name: network_compliance
+    agent: network_agent
+    tool: run_compliance_check
+    params: {}
+    depends_on: []
+    on_error: continue
+
+  - name: cloud_security
+    agent: azure_architect_agent
+    tool: run_security_assessment
+    params: {}
+    depends_on: []
+    on_error: continue
+
+  - name: server_audit
+    agent: sysadmin_agent
+    tool: list_servers
+    params: {}
+    depends_on: []
+    on_error: continue
+
+  - name: vulnerability_scan
+    agent: hacking_agent
+    tool: list_findings
+    params: {}
+    depends_on: []
+    on_error: continue

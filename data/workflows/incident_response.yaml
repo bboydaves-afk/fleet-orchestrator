@@ -1,0 +1,62 @@
+name: incident_response
+description: "Multi-agent incident response workflow — triage, diagnose, escalate, notify"
+
+steps:
+  - name: initial_triage
+    agent: helpdesk_agent
+    tool: create_incident
+    params: {}
+    depends_on: []
+    on_error: stop
+    retries: 1
+    timeout_seconds: 60
+
+  - name: network_check
+    agent: network_agent
+    tool: run_health_check
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: server_check
+    agent: sysadmin_agent
+    tool: list_servers
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: security_check
+    agent: hacking_agent
+    tool: list_findings
+    params: {}
+    depends_on:
+      - network_check
+      - server_check
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: escalate
+    agent: monitoring_agent
+    tool: create_alert
+    params: {}
+    depends_on:
+      - initial_triage
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: client_notify
+    agent: psa_agent
+    tool: create_ticket
+    params: {}
+    depends_on:
+      - initial_triage
+      - security_check
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60

@@ -1,0 +1,47 @@
+name: product_launch
+description: "Product launch workflow — marketing campaign + content creation + YouTube + infrastructure scaling"
+
+steps:
+  - name: create_campaign
+    agent: marketing_agent
+    tool: create_content
+    params:
+      type: campaign
+      topic: "Product Launch"
+    depends_on: []
+    on_error: stop
+
+  - name: generate_script
+    agent: content_creator_agent
+    tool: generate_script
+    params:
+      topic: "Product Launch Announcement"
+      style: professional
+    depends_on: []
+    on_error: continue
+
+  - name: plan_youtube_video
+    agent: youtube_growth_agent
+    tool: generate_script
+    params:
+      topic: "Product Launch"
+      format: long_form
+    depends_on:
+      - generate_script
+    on_error: continue
+
+  - name: check_infrastructure
+    agent: sysadmin_agent
+    tool: list_servers
+    params: {}
+    depends_on: []
+    on_error: continue
+
+  - name: assess_scaling
+    agent: azure_architect_agent
+    tool: run_assessment
+    params:
+      scope: "scaling"
+    depends_on:
+      - check_infrastructure
+    on_error: continue

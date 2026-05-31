@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Fleet Orchestrator</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <img id="brand-logo" src="" alt="" style="display:none;max-width:180px;max-height:40px;margin-bottom:8px">
+            <h2 id="brand-name">Fleet Orchestrator</h2>
+            <span class="version">v1.0.0</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link active" data-page="dashboard">Dashboard</a></li>
+            <li><a href="#" class="nav-link" data-page="agents">Agents</a></li>
+            <li><a href="#" class="nav-link" data-page="tools">Tools</a></li>
+            <li><a href="#" class="nav-link" data-page="workflows">Workflows</a></li>
+            <li><a href="#" class="nav-link" data-page="executions">Executions</a></li>
+            <li><a href="#" class="nav-link" data-page="scheduler">Scheduler</a></li>
+            <li><a href="#" class="nav-link" data-page="alerts">Alerts</a></li>
+            <li><a href="#" class="nav-link" data-page="policies">Policies</a></li>
+            <li><a href="#" class="nav-link" data-page="escalations">Escalations</a></li>
+            <li><a href="#" class="nav-link" data-page="audit">Audit Log</a></li>
+            <li><a href="#" class="nav-link" data-page="chat">AI Chat</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <!-- Dashboard -->
+        <div id="page-dashboard" class="page active">
+            <h1>Fleet Dashboard</h1>
+            <div class="stats-grid" id="stats-grid"></div>
+            <div class="card">
+                <h3>Agent Status</h3>
+                <div id="agent-status-list"></div>
+            </div>
+            <div class="card">
+                <h3>Recent Executions</h3>
+                <div id="recent-executions"></div>
+            </div>
+        </div>
+
+        <!-- Agents -->
+        <div id="page-agents" class="page">
+            <h1>Fleet Agents</h1>
+            <button class="btn btn-primary" onclick="connectAll()">Connect All</button>
+            <div id="agents-grid" class="agents-grid"></div>
+        </div>
+
+        <!-- Tools -->
+        <div id="page-tools" class="page">
+            <h1>Tool Discovery</h1>
+            <div class="search-bar">
+                <input type="text" id="tool-search" placeholder="Search tools across all agents..."
+                       onkeyup="searchTools()">
+            </div>
+            <div id="tools-list"></div>
+        </div>
+
+        <!-- Workflows -->
+        <div id="page-workflows" class="page">
+            <h1>Workflows</h1>
+            <div id="workflows-list"></div>
+        </div>
+
+        <!-- Executions -->
+        <div id="page-executions" class="page">
+            <h1>Execution Log</h1>
+            <div id="execution-log"></div>
+        </div>
+
+        <!-- Scheduler -->
+        <div id="page-scheduler" class="page">
+            <h1>Scheduled Jobs</h1>
+            <div id="scheduler-list"></div>
+        </div>
+
+        <!-- Alerts -->
+        <div id="page-alerts" class="page">
+            <h1>Alerts &amp; Notifications</h1>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="loadAlertChannels()">Channels</button>
+                <button class="tab-btn" onclick="loadAlertRules()">Rules</button>
+                <button class="tab-btn" onclick="loadActiveAlerts()">Active</button>
+                <button class="tab-btn" onclick="loadAlertHistory()">History</button>
+            </div>
+            <div id="alerts-content"></div>
+        </div>
+
+        <!-- Policies -->
+        <div id="page-policies" class="page">
+            <h1>Autonomous Policies</h1>
+            <div id="policies-list"></div>
+        </div>
+
+        <!-- Escalations -->
+        <div id="page-escalations" class="page">
+            <h1>Escalation Manager</h1>
+            <div class="stats-grid" id="escalation-stats-grid"></div>
+            <div id="escalations-list"></div>
+        </div>
+
+        <!-- Audit Log -->
+        <div id="page-audit" class="page">
+            <h1>Audit Log</h1>
+            <div class="search-bar">
+                <input type="text" id="audit-filter" placeholder="Filter by action, agent, tool, or user..." onkeyup="filterAudit()">
+            </div>
+            <div id="audit-log-content"></div>
+        </div>
+
+        <!-- Chat -->
+        <div id="page-chat" class="page">
+            <h1>Fleet AI Chat</h1>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="chat-input-bar">
+                <input type="text" id="chat-input" placeholder="Ask the fleet orchestrator..."
+                       onkeydown="if(event.key==='Enter')sendChat()">
+                <button class="btn btn-primary" onclick="sendChat()">Send</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+name: morning_briefing
+description: "Morning fleet briefing — parallel health checks + trading performance + marketing metrics"
+
+steps:
+  - name: sysadmin_health
+    agent: sysadmin_agent
+    tool: list_servers
+    params: {}
+    depends_on: []
+    on_error: continue
+
+  - name: network_health
+    agent: network_agent
+    tool: list_devices
+    params: {}
+    depends_on: []
+    on_error: continue
+
+  - name: trading_status
+    agent: ftmo_manager
+    tool: get_account_summary
+    params: {}
+    depends_on: []
+    on_error: continue
+
+  - name: marketing_metrics
+    agent: marketing_agent
+    tool: get_analytics_summary
+    params: {}
+    depends_on: []
+    on_error: continue
+
+  - name: youtube_growth
+    agent: youtube_growth_agent
+    tool: get_growth_summary
+    params: {}
+    depends_on: []
+    on_error: continue

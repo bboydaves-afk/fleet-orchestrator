@@ -1,0 +1,24 @@
+name: morning-briefing-backup
+version: "1.0"
+description: >
+  Run morning briefing workflow when a critical agent recovers,
+  as a backup trigger in case the scheduled briefing was missed.
+enabled: false
+
+trigger_type: fleet_event
+conditions:
+  event_type: agent_recovered
+
+target_filter:
+  agent_names:
+    - sysadmin_agent
+
+actions:
+  - type: workflow
+    workflow_name: morning_briefing
+
+cooldown_seconds: 3600
+max_retries: 1
+escalate_after_retries: 1
+escalation_channels: []
+require_approval: false

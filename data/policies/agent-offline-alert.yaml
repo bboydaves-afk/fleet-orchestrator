@@ -1,0 +1,23 @@
+name: agent-offline-alert
+version: "1.0"
+description: >
+  Send a Slack notification when any agent goes offline.
+  If still offline after 3 checks, escalate to email.
+enabled: true
+
+trigger_type: fleet_event
+conditions:
+  event_type: agent_offline
+
+target_filter: {}
+
+actions:
+  - type: alert
+    message: "Agent ${{agent_name}} went offline"
+    channels: [slack]
+
+cooldown_seconds: 300
+max_retries: 3
+escalate_after_retries: 3
+escalation_channels: [email]
+require_approval: false

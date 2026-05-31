@@ -1,0 +1,66 @@
+name: fleet_health_check
+description: "Full fleet health check — parallel health checks on all critical infrastructure agents"
+
+steps:
+  - name: sysadmin_health
+    agent: sysadmin_agent
+    tool: list_servers
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: network_health
+    agent: network_agent
+    tool: list_devices
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: azure_health
+    agent: azure_architect_agent
+    tool: list_resources
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: endpoint_health
+    agent: endpoint_agent
+    tool: list_devices
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: backup_health
+    agent: backup_agent
+    tool: list_backup_jobs
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: monitoring_health
+    agent: monitoring_agent
+    tool: get_monitoring_status
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
+
+  - name: m365_health
+    agent: m365_agent
+    tool: get_tenant_health
+    params: {}
+    depends_on: []
+    on_error: continue
+    retries: 1
+    timeout_seconds: 60
